@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, WebSocket
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Dict
-from app.models.models import WebsocketData, WebsocketEvent, PingEvent, PingResponse, Connection
+from models.models import WebsocketData, WebsocketEvent, PingEvent, PingResponse, Connection
 import uvicorn
 
 

@@ -2,7 +2,7 @@ import asyncio
 import random
 from typing import Any, Dict
 import websockets
-from app.models.models import WebsocketData, WebsocketEvent
+from models.models import WebsocketData, WebsocketEvent
 
 
 class Client:
