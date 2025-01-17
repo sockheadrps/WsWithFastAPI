@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Request, WebSocket
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from typing import Dict
-from app.models.models import WebsocketData, WebsocketEvent, PingEvent, PingResponse, Connection
+from models.models import WebsocketData, WebsocketEvent, PingEvent, PingResponse, Connection
 import uvicorn
 
 
@@ -16,19 +17,24 @@ templates = Jinja2Templates(directory="server/templates")
 
 class BaseConnectionManager:
     def __init__(self):
-        pass
+        self.active_connections: Dict[str, WebSocket] = {}
 
     async def connect(self, websocket: WebSocket) -> Connection:
-        pass
+        await websocket.accept()
+        connection = Connection(websocket=websocket)
+        self.active_connections[connection.id] = websocket
+        return connection
 
     def disconnect(self, connection_id: str):
-        pass
+        if connection_id in self.active_connections:
+            del self.active_connections[connection_id]
 
     async def send_to_client(self, client_id: str, message: dict):
-        pass
+        if client_id in self.active_connections:
+            await self.active_connections[client_id].send_json(message)
 
     def get_active_connections(self):
-        pass
+        return list(self.active_connections.keys())
 
 
 class PyConnectionManager(BaseConnectionManager):
@@ -47,7 +53,11 @@ async def broadcast_py_clients_to_web():
 
 @app.websocket("/ws/py_client")
 async def py_client_websocket_endpoint(websocket: WebSocket):
-    pass
+    connection = await py_connection_manager.connect(websocket)
+    await websocket.send_json(WebsocketEvent(event="connect",
+                                             client_id=connection.id,
+                                             data=WebsocketData(data={})).model_dump())
+                                             
 
 
 @app.websocket("/ws/web_client")
@@ -61,13 +71,15 @@ async def index(request: Request):
 
 
 @app.get("/ping-schema")
-async def ping_schema():
-    pass
+async def ping_schema() -> JSONResponse:
+    ping_event_structure = PingEvent.model_json_schema()
+    return JSONResponse(content=ping_event_structure)
 
 
 @app.get("/ping-response-schema")
 async def ping_response_schema():
-    pass
+    ping_response_event_structure = PingResponse.model_json_schema()
+    return JSONResponse(content=ping_response_event_structure)
 
 
 if __name__ == "__main__":

@@ -5,19 +5,27 @@ from fastapi import WebSocket
 
 
 class Connection(BaseModel):
-    pass
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    websocket: WebSocket
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class WebsocketData(BaseModel):
-    pass
+    data: Dict[str, Union[str, int, bool, List[str], Dict[str, Any]]] = Field(...)
 
 
 class WebsocketEvent(BaseModel):
-    pass
+    event: str
+    client_id: str
+    data: WebsocketData
 
 class PingEvent(WebsocketEvent):
-    pass
+    event: Literal["ping"]
+    data: WebsocketData = Field(...)
 
 
 class PingResponse(WebsocketEvent):
-    pass
+    event: Literal["ping_response"]
+    data: WebsocketData
