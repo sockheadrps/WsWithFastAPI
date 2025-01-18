@@ -1,4 +1,7 @@
 
+<!-- readme gif -->
+![readme gif](./readme-assets/example.gif)
+
 # Project Setup
 Create a python virtual environment.
 ```bash
@@ -33,38 +36,6 @@ cd WsWithFastAPI
 git checkout base-structure
 ```
 
-# Manual project setup
-<details><summary> If you prefer to set up the project on your own: </summary>
-<br>
-
-
-From the root directory, create a directory, `app` with an `__init__.py` file in it.  Then, three more directories: `client`, `server`, and `models`.
-Each of these directories will have a `__init__.py` file. In both the `client` and `server` directories, create a `main.py`. The models directory will get a `models.py`, and also the server directory will get `templates` and `static` directories.  
-
-Inside app/server/templates, create an `index.html` file.  
-Inside app/server/static, create a `styles.css` file and a `scripts.js`.  
-
-The file structure should look like this:
-```
-app/
-    __init__.py
-    client/
-        __init__.py
-        main.py
-    server/
-        templates/
-            index.html
-        static/ 
-            styles.css
-            scripts.js
-        __init__.py
-        main.py
-    models/
-        __init__.py
-        models.py
-```
-
- </details>
 
 ## To run the server:
 **From the app directory, run the following command:**
@@ -72,13 +43,3 @@ app/
 ```bash
 python -m server.main
 ```
-
-## To run the client:
-**From the app directory, run the following command:**
-
-```bash
-python -m client.main
-```
-
-
-
