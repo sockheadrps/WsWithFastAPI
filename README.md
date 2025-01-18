@@ -23,11 +23,12 @@ After activating the virtual enviornment, install the required packages from the
 pip install -r requirements.txt
 ```
 
-# Git provided project setup:
+# Git provided project structure:
 
-I have created a branch with the base structure of the project. This branch has the basic file structure and base class and function initialization (without implementation) as well as the required files to get started.
+I the main branch has the basic file structure and base class and function initialization (without implementation) as well as the required files to get started. The chart branch has the completed project.
 
-Clone the repository and checkout the `base-structure` branch.
+
+Clone the repository and checkout the `main` branch.
 
 
 ```bash
