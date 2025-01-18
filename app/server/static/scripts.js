@@ -1,144 +1,276 @@
-document.addEventListener("DOMContentLoaded", async function () {
+// Wait for Chart.js to load before initializing charts
+document.addEventListener('DOMContentLoaded', async function () {
   // Fetch the schemas from the endpoints
-  const [pingSchemaResponse, pingResponseSchemaResponse] = await Promise.all([
-      fetch('/ping-schema'),
-      fetch('/ping-response-schema')
+  const [statsSchemaResponse] = await Promise.all([
+    fetch('/api/1.0.0/data-schema'),
   ]);
-  const pingEventSchema = await pingSchemaResponse.json();
-  const pingResponseSchema = await pingResponseSchemaResponse.json();
+  const statsSchema = await statsSchemaResponse.json();
 
   // Function to validate event against schema
   function validateAgainstSchema(event, schema) {
-      // Basic validation of required fields and types
-      if (schema.required) {
-          for (const field of schema.required) {
-              if (!(field in event)) {
-                  throw new Error(`Missing required field: ${field}`);
-              }
-          }
+    // Basic validation of required fields and types
+    if (schema.data_schema.required) {
+      for (const field of schema.data_schema.required) {
+        if (!(field in event)) {
+          throw new Error(`Missing required field: ${field}`);
+        }
       }
+    }
 
-      // Validate properties according to schema
-      for (const [key, value] of Object.entries(event)) {
-          const propertySchema = schema.properties[key];
-          if (propertySchema && propertySchema.type) {
-              const type = typeof value;
-              if (propertySchema.type === 'string' && type !== 'string') {
-                  throw new Error(`${key} must be a string`);
-              }
-              if (propertySchema.type === 'object' && type !== 'object') {
-                  throw new Error(`${key} must be an object`);
-              }
-          }
+    // Validate properties according to schema
+    for (const [key, value] of Object.entries(event)) {
+      const propertySchema = schema.data_schema.properties[key];
+      if (propertySchema && propertySchema.type) {
+        const type = typeof value;
+        if (propertySchema.type === 'string' && type !== 'string') {
+          throw new Error(`${key} must be a string`);
+        }
+        if (propertySchema.type === 'object' && type !== 'object') {
+          throw new Error(`${key} must be an object`);
+        }
       }
-      return true;
+    }
+    return true;
   }
 
-  // Create container for client cards
-  const clientsContainer = document.createElement('div');
-  clientsContainer.id = 'clients-container';
-  document.body.appendChild(clientsContainer);
+  // Open Websocket connection
+  var socket = new WebSocket('ws://localhost:8000/api/1.0.0/ws/stats');
 
-  // Track ping timestamps
-  const pingTimestamps = new Map();
+  // On open function
+  socket.onopen = function (event) {
+    socket.send(
+      JSON.stringify({ event: 'CONNECT', client: 'SERVER-STATS' })
+    );
+  };
 
-  // Function to create/update client cards
-  function updateClientCards(pyClients) {
-      clientsContainer.innerHTML = ''; // Clear existing cards
-      
-      pyClients.forEach(clientId => {
-          const card = document.createElement('div');
-          card.className = 'client-card';
-          card.style.border = '1px solid #ccc';
-          card.style.padding = '10px';
-          card.style.margin = '10px';
-          card.style.borderRadius = '5px';
+  // Setting up HTML Elements
+  let cpu_count = document.getElementById('cpu_count');
+  let cpu_usage = document.getElementById('cpu_usage');
+  let cpu_frequency = document.getElementById('cpu_frequency');
+  let core_temperature = document.getElementById('core_temperature');
+  let ram_total = document.getElementById('ram_total');
+  let ram_availble = document.getElementById('ram_available');
+  let ram_percentage = document.getElementById('ram_percentage');
+  let disk_total = document.getElementById('disk_total');
+  let disk_free = document.getElementById('disk_free');
+  let disk_used = document.getElementById('disk_used');
+  let disk_percentage = document.getElementById('disk_percentage');
 
-          const idText = document.createElement('p');
-          idText.textContent = `Client ID: ${clientId}`;
-          
-          const latencyText = document.createElement('p');
-          latencyText.id = `latency-${clientId}`;
-          latencyText.textContent = 'Latency: Not measured';
-          
-          const pingButton = document.createElement('button');
-          pingButton.textContent = 'Ping';
-          pingButton.onclick = () => {
-              try {
-                  const pingEvent = {
-                      event: pingEventSchema.properties.event.const,
-                      client_id: myClientId,
-                      data: {
-                          data: {
-                              target_client_id: clientId
-                          }
-                      }
-                  };
+  // Main Websocket Communication
+  socket.onmessage = function (event) {
+    let data = JSON.parse(event.data);
+    console.log(data);
+    if (data.data) {
+      if (data.event === 'data-request') {
+        try {
+          validateAgainstSchema(data.data, statsSchema);
+          updateData(data.data);
+        } catch (err) {
+          console.error('Schema validation failed:', err);
+        }
+      }
+    }
+  };
 
-                  validateAgainstSchema(pingEvent, pingEventSchema);
-                  pingTimestamps.set(clientId, Date.now());
-                  socket.send(JSON.stringify(pingEvent));
-                  console.log('Ping event sent:', pingEvent);
-              } catch (error) {
-                  console.error('Error sending ping event:', error);
-              }
-          };
+  // Chart configs
+  let numberElements = 120;
 
-          card.appendChild(idText);
-          card.appendChild(latencyText);
-          card.appendChild(pingButton);
-          clientsContainer.appendChild(card);
-      });
+  //Globals
+  let updateCount = 0;
+
+  // Chart Objects
+  let cpuUsageChart = document.getElementById('cpuUsage');
+  let ramUsageChart = document.getElementById('ramUsage');
+  let diskUsageChart = document.getElementById('diskUsage');
+
+  // Common Chart Options (Line)
+  let commonOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    backgroundColor: 'rgba(33,31,51,0.5)',
+    borderColor: 'rgba(33,31,51,1)',
+    fill: true,
+    scales: {
+      x: {
+        color: 'black',
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: 'black',
+        },
+      },
+      y: {
+        beginAtZero: true,
+        max: 100,
+        grid: {
+          color: 'rgba(33,31,51,0.2)',
+        },
+        ticks: {
+          color: 'black',
+        },
+      },
+    },
+    legend: { display: false },
+    tooltips: {
+      enabled: false,
+    },
+  };
+
+  // cpuUsageChart Instance
+  var cpuUsageChartInstance = new Chart(cpuUsageChart, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'CPU Usage',
+          data: 0,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: Object.assign({}, commonOptions, {
+      responsive: true,
+      title: {
+        display: true,
+        text: 'CPU Usage',
+        fontSize: 18,
+      },
+    }),
+  });
+
+  // ramUsageChart Instance
+  var ramUsageChartInstance = new Chart(ramUsageChart, {
+    type: 'line',
+    data: {
+      datasets: [
+        {
+          label: 'RAM Usage',
+          data: 0,
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: Object.assign({}, commonOptions, {
+      title: {
+        display: true,
+        text: 'RAM Usage',
+        fontSize: 18,
+      },
+    }),
+  });
+
+  // diskUsageChart Instance
+  var diskUsageChartInstance = new Chart(diskUsageChart, {
+    type: 'doughnut',
+    responsive: false,
+    maintainAspectRatio: false,
+    labels: ['free', 'Used'],
+    data: {
+      datasets: [
+        {
+          label: 'Disk Usage',
+          data: [1, 1],
+          backgroundColor: [
+            'rgba(189, 27, 15, .8)',
+            'rgba(33, 31, 81, .9)',
+          ],
+          hoverOffset: 4,
+        },
+      ],
+    },
+    options: Object.assign(
+      {},
+      {
+        title: {
+          display: true,
+          text: 'Disk Usage',
+          fontSize: 18,
+        },
+      }
+    ),
+  });
+
+  // Function to push data to chart object instances
+  function addData(data) {
+    if (!data) return;
+
+    try {
+      let today = new Date();
+      let time =
+        today.getMinutes() < 10
+          ? `${today.getHours()}:0${today.getMinutes()}`
+          : `${today.getHours()}:${today.getMinutes()}`;
+
+      // Initialize datasets if needed
+      if (!cpuUsageChartInstance.data.datasets[0].data) {
+        cpuUsageChartInstance.data.datasets[0].data = [];
+      }
+      if (!ramUsageChartInstance.data.datasets[0].data) {
+        ramUsageChartInstance.data.datasets[0].data = [];
+      }
+      if (!cpuUsageChartInstance.data.labels) {
+        cpuUsageChartInstance.data.labels = [];
+      }
+      if (!ramUsageChartInstance.data.labels) {
+        ramUsageChartInstance.data.labels = [];
+      }
+
+      // CPU Usage
+      cpuUsageChartInstance.data.labels.push(time);
+      cpuUsageChartInstance.data.datasets[0].data.push(
+        data.cpu_usage
+      );
+
+      // RAM Usage
+      ramUsageChartInstance.data.labels.push(time);
+      ramUsageChartInstance.data.datasets[0].data.push(
+        data.ram_percentage
+      );
+
+      // Disk Usage
+      diskUsageChartInstance.data.datasets[0].data = [
+        data.disk_used,
+        data.disk_free,
+      ];
+
+      if (updateCount > numberElements) {
+        // For shifting the x axis markers
+        cpuUsageChartInstance.data.labels.shift();
+        cpuUsageChartInstance.data.datasets[0].data.shift();
+        ramUsageChartInstance.data.labels.shift();
+        ramUsageChartInstance.data.datasets[0].data.shift();
+      } else {
+        updateCount++;
+      }
+
+      cpuUsageChartInstance.update();
+      ramUsageChartInstance.update();
+      diskUsageChartInstance.update();
+    } catch (err) {
+      console.error('Error updating charts:', err);
+    }
   }
 
-  // WebSocket connection setup
-  const socket = new WebSocket('ws://localhost:8000/ws/web_client');
-  let myClientId = null;
+  // Update HTML elements
+  function updateData(data) {
+    if (!data) return;
 
-  socket.onopen = () => {
-      console.log('WebSocket connection established');
-  };
+    try {
+      addData(data);
 
-  socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log("Received from server:", message);
-
-      if (message.event === "connect") {
-          myClientId = message.client_id;
-          console.log('Received client ID:', myClientId);
-      } else if (message.event === "py_clients_update") {
-          updateClientCards(message.data.data.py_clients);
-      } else if (message.event === "ping_response") {
-          try {
-              validateAgainstSchema(message, pingResponseSchema);
-              const targetClientId = message.client_id;
-              const startTime = pingTimestamps.get(targetClientId);
-              if (startTime) {
-                  const latency = Date.now() - startTime;
-                  
-                  // calculate the latency as a ratio between 0 and 1, and then scale that to a color between green and red
-                  const latencyRatio = Math.min(latency / 1000, 1); // Cap at 1
-                  const red = Math.round(255 * latencyRatio);
-                  const green = Math.round(255 * (1 - latencyRatio));
-                  const latencyColor = `rgba(${red}, ${green}, 0, 0.5)`;
-                  const latencyElement = document.getElementById(`latency-${targetClientId}`);
-                  if (latencyElement) {
-                      latencyElement.textContent = `Latency: ${latency}ms`;
-                      latencyElement.parentElement.style.backgroundColor = latencyColor;
-                  }
-                  pingTimestamps.delete(targetClientId);
-              }
-          } catch (error) {
-              console.error('Error processing ping response:', error);
-          }
-      }
-  };
-
-  socket.onclose = () => {
-      console.log('WebSocket connection closed');
-  };
-
-  socket.onerror = (error) => {
-      console.log('WebSocket error:', error);
-  };
-});
+      cpu_count.innerHTML = `Core count: ${data.cpu_count}`;
+      cpu_usage.innerHTML = `CPU usage: ${data.cpu_usage}%`;
+      cpu_frequency.innerHTML = `CPU Frequency: ${data.cpu_frequency.current_frequency} GHz`;
+      ram_total.innerHTML = `RAM total: ${data.ram_total} GB`;
+      ram_available.innerHTML = `RAM Available: ${data.ram_available} GB`;
+      ram_percentage.innerHTML = `Percentage of RAM used: ${data.ram_percentage}%`;
+      disk_total.innerHTML = `Disk space total: ${data.disk_total} GB`;
+      disk_free.innerHTML = `Disk Space Free: ${data.disk_free} GB`;
+      disk_used.innerHTML = `Disk Space used: ${data.disk_used} GB`;
+      disk_percentage.innerHTML = `Disk Space Used: ${data.disk_percentage}%`;
+    } catch (err) {
+      console.error('Error updating stats:', err);
+    }
+  }
+}); // End of DOMContentLoaded
