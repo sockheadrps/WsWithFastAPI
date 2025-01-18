@@ -1,6 +1,6 @@
 import json
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Dict, Literal, Any
+from typing import Dict, Any
 from fastapi import WebSocket
 from enum import Enum
 import uuid
@@ -23,7 +23,6 @@ class Connection(BaseModel):
     )
 
 
-
 class EventType(str, Enum):
     DATA_REQUEST = "data-request"
 
@@ -32,24 +31,12 @@ class ConnectionResponsePayload(BaseModel):
     client_id: UUID
     server_time: datetime
 
-    def model_dump(self, **kwargs):
-        data = super().model_dump(**kwargs)
-        data["client_id"] = str(data["client_id"])
-        data["server_time"] = data["server_time"].isoformat()
-        return data
-
 
 class BaseWebsocketEvent(BaseModel):
     client_id: UUID = Field(default_factory=uuid.uuid4)
     event: str
     payload: Dict[str, Any]
     timestamp: datetime = Field(default_factory=datetime.now)
-
-    def model_dump(self, **kwargs):
-        data = super().model_dump(**kwargs)
-        data["client_id"] = str(data["client_id"])
-        data["timestamp"] = data["timestamp"].isoformat()
-        return data
 
 
 class StatsPayload(BaseModel):
@@ -77,7 +64,3 @@ class StatsEvent(BaseModel):
         data["client_id"] = str(data["client_id"])
         data["timestamp"] = data["timestamp"].isoformat()
         return data
-
-    def model_dump_json(self, **kwargs):
-        data = self.model_dump(**kwargs)
-        return json.dumps(data)
