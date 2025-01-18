@@ -1,127 +1,182 @@
-/* General Reset and Body Styles */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: 'Arial', sans-serif;
-  background-color: #f7f7f7;
-  color: #333;
-  line-height: 1.6;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
+main {
   height: 100vh;
-  align-items: flex-start; /* Align to top left */
-}
-
-/* Main Header Styles */
-h1 {
-  font-size: 2.5rem;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 20px;
-  padding-left: 10px;
-}
-
-/* Container for Clients */
-#clients-container {
+  background: linear-gradient(to right top, #3a3661, #231e4d);
   display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
-  justify-content: flex-start; /* Align to top left */
-  width: 100%;
-  padding-left: 10px; /* Add some padding for better layout */
+  align-items: center;
+  justify-content: center;
 }
 
-/* Styles for each Client Card */
-.client-card {
-  background-color: #fff;
-  border-radius: 10px;
-  padding: 20px;
-  width: min-content;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+.glass {
+  background: white;
+  min-height: 90vh;
+  width: 90%;
+  background: linear-gradient(
+      to right bottom,
+       rgba(255, 255, 255, 0.05), 
+       rgba(255, 255, 255, .1)
+       );
+  border-radius: 2rem;
+  z-index: 3;
+  backdrop-filter: blur(1.1rem);
+}
+
+.chevron{
+  height: 6rem;
+  width: 80%;
+  position: absolute;
+}
+.chevron:before {
+  content: '';
+  position: absolute;
+  top: 17rem;
+  left: -10rem;
+  height: 85%;
+  width: 49vw;
+  background: linear-gradient(
+      to right bottom,
+       rgba(255, 255, 255, 0.05), 
+       rgba(255, 255, 255, .1)
+       );
+  transform: skew(0deg, 15deg);
+  z-index: 2;
+  border-radius: 1.5rem;
+}
+.chevron:after {
+  content: '';
+  position: absolute;
+  top: 17rem;
+  right: -10rem;
+  height: 85%;
+  width: 49vw;
+  background: linear-gradient(
+      to right bottom,
+       rgba(255, 255, 255, 0.05), 
+       rgba(255, 255, 255, .1)
+       );
+  transform: skew(0deg, -15deg);
+  z-index: 2;
+  border-radius: 1.5rem;
+} 
+
+
+
+.main-container {
+  margin-top: 5%;
+  width: 100%;
+  height: 700px;
+  margin: 25px 25px 25px 25px;
+}
+
+.usage-container{
+  /* border: 1px solid rgb(255, 255, 255); */
+  display:flex;
+  justify-content: center;
+  height: 600px;
+  margin: 25px 10px 10px 10px;
+}
+
+.label{
+  vertical-align: middle;
   text-align: center;
 }
 
-.client-card:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  transform: translateY(-5px);
+.chart{
+  /* border: 1px solid rgb(185, 206, 26); */
+  background-color: rgba(36, 38, 26, 0.082);
+  height: 360px;
+  width: 500px;
+
 }
 
-.client-card p {
-  font-size: 1rem;
-  color: #666;
-  white-space: nowrap; /* Prevent client ID from breaking into multiple lines */
-  overflow: hidden;
-  text-overflow: ellipsis; /* Add ellipsis if the text overflows */
-}
-
-.client-card h3 {
-  font-size: 1.2rem;
-  font-weight: 500;
-  color: #444;
-  margin-bottom: 10px;
-}
-
-/* Latency Info Styling */
-#latency-text {
-  font-size: 1rem;
-  color: #333;
-}
-
-/* Ping Button Styling */
-button {
-  background-color: #4caf50;
-  color: #fff;
-  font-size: 1rem;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.disk-chart{
+  /* border: 1px solid rgb(185, 206, 26); */
+  flex:2;
+  margin: 10px;
+  margin-bottom: 68px;
   margin-top: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-button:hover {
-  background-color: #45a049;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-button:active {
-  transform: translateY(2px); /* Button press effect */
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Reduce shadow on click */
-}
-
-button:focus {
-  outline: none; /* Remove the default outline */
-  border: 2px solid #4caf50; /* Green border when focused */
-}
-
-/* Styling for Error Messages */
-.error-message {
-  color: #e74c3c;
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-/* Animation for Ping Event */
-@keyframes pingAnimation {
-  0% {
-    transform: scale(1);
   }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
+
+.use-container{
+  /* border: 1px solid rgb(162, 34, 162); */
+  text-align: center;
+  padding: 20px;   
+  margin: 10px;
+  height: 600px;
+  background: linear-gradient(to right bottom, rgba(145, 92, 8, 0.7), rgba(138, 105, 9, .9));
+
+  border-radius: 10px;
+  box-shadow: 3px 3px rgba(86, 77, 6, 0.9);
 }
 
-.ping-button-active {
-  animation: pingAnimation 1s ease-in-out;
+h1{
+  text-align: center;
+}
+
+.stats {
+  flex-grow: 1;
+  /* border: 1px solid rgb(34, 109, 162);  */
+  margin-top: 20px;
+}
+
+.stat {
+  font-weight: bold;
+  margin-top: 8px;
+  text-align: center;
+  color: #211F33;
+}
+
+.services{
+  position: relative;
+  display: flex;
+  color: aliceblue;
+  margin-top: 6rem;
+  margin-left: 40px;
+  margin-right: 40px;
+  margin-bottom: 1rem;
+  height: 5rem;
+  border-radius: 1.5rem;
+
+}
+
+.service {
+  border-radius: 1.5rem;
+  width: 90%;
+  position: relative;
+  text-align: center;
+  align-items: center;
+  padding-top: .8rem;
+  margin-left: 5rem;
+  margin-right: 5rem;
+
+}
+
+.service-twitch{
+  width: 10%;
+  flex: 1;
+
+}
+.service-two{
+  width: 10%;
+  flex: 1;
+
+}
+.service-three{
+  width: 10%;
+  flex: 1;
+}
+
+.service-on {
+  background: linear-gradient(to right top, rgba(58, 54, 97, .5), rgba(35, 30, 77, .9));
+  color: rgba(180, 138, 12, 0.9);
+}
+
+.service-off {
+  background: linear-gradient(to right top, rgba(51, 54, 97, .2), rgba(35, 30, 77, .3));
+  color: #2f2a5f;
 }
