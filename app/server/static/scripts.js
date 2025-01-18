@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   // diskUsageChart Instance
   var diskUsageChartInstance = new Chart(diskUsageChart, {
     type: 'doughnut',
-    responsive: false,
+    responsive: true,
     maintainAspectRatio: false,
     labels: ['free', 'Used'],
     data: {
@@ -187,6 +187,15 @@ document.addEventListener('DOMContentLoaded', async function () {
           text: 'Disk Usage',
           fontSize: 18,
         },
+        aspectRatio: 1,
+        layout: {
+          padding: {
+            left: 0,
+            right: 0,
+            top: 20,
+            bottom: 20
+          }
+        }
       }
     ),
   });
