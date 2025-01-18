@@ -40,20 +40,11 @@ async def stats_endpoint(request: Request) -> HTMLResponse:
 
 @app.websocket(f"/api/{API_VERSION}/ws/stats")
 async def stats_websocket(client_websocket: WebSocket):
-    try:
-        connection = await connection_manager.connect(client_websocket)
-        await connection_manager.handle_message(connection)
-
-    except Exception as e:
-        print(f"[red]WebSocket connection error: {str(e)}[/red]")
-
-    finally:
-        await connection_manager.disconnect(str(connection.client_id))
+    pass
 
 
 @app.get(f"/api/{API_VERSION}/data-schema")
 def data_schema():
-    """Return the JSON schema for stats payload validation"""
     return {"data_schema": StatsPayload.model_json_schema()}
 
 
