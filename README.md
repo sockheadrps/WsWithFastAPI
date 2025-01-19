@@ -22,7 +22,11 @@ pip install -r requirements.txt
 
 # Git provided project setup:
 
-I have created a branch with the base structure of the project. This branch has the basic file structure and base class and function initialization (without implementation) as well as the required files to get started.
+I have created a branch with the base structure of the project. This branch has the basic file structure and base class and function initialization (without implementation) as well as the required files to get started. Just fill in the functions and classes that have had their implementation removed and replaced with `pass`. These missing implementations exist in app.server.utilities.models.models, app.server.utilities.manager, and app.server.main.
+
+The CSS, JS and HTML is provided, as well as the object that gets the sensor and hardware data from the PC.
+
+Complete code is available on the main branch.
 
 Clone the repository and checkout the `base-structure` branch.
 
@@ -33,38 +37,6 @@ cd WsWithFastAPI
 git checkout base-structure
 ```
 
-# Manual project setup
-<details><summary> If you prefer to set up the project on your own: </summary>
-<br>
-
-
-From the root directory, create a directory, `app` with an `__init__.py` file in it.  Then, three more directories: `client`, `server`, and `models`.
-Each of these directories will have a `__init__.py` file. In both the `client` and `server` directories, create a `main.py`. The models directory will get a `models.py`, and also the server directory will get `templates` and `static` directories.  
-
-Inside app/server/templates, create an `index.html` file.  
-Inside app/server/static, create a `styles.css` file and a `scripts.js`.  
-
-The file structure should look like this:
-```
-app/
-    __init__.py
-    client/
-        __init__.py
-        main.py
-    server/
-        templates/
-            index.html
-        static/ 
-            styles.css
-            scripts.js
-        __init__.py
-        main.py
-    models/
-        __init__.py
-        models.py
-```
-
- </details>
 
 ## To run the server:
 **From the app directory, run the following command:**
