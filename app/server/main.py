@@ -35,7 +35,7 @@ async def favicon() -> None:
 
 @app.get("/stats", response_class=HTMLResponse)
 async def stats_endpoint(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request})
+    pass
 
 
 @app.websocket(f"/api/{API_VERSION}/ws/stats")
@@ -45,7 +45,7 @@ async def stats_websocket(client_websocket: WebSocket):
 
 @app.get(f"/api/{API_VERSION}/data-schema")
 def data_schema():
-    return {"data_schema": StatsPayload.model_json_schema()}
+    pass
 
 
 if __name__ == "__main__":
