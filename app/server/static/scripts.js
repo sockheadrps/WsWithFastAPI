@@ -34,7 +34,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   // Open Websocket connection
-  var socket = new WebSocket('ws://localhost:8000/api/1.0.0/ws/stats');
+  var socket = new WebSocket(
+    'ws://localhost:8000/api/1.0.0/ws/stats'
+  );
 
   // On open function
   socket.onopen = function (event) {
