@@ -17,16 +17,16 @@ main {
   min-height: 90vh;
   width: 90%;
   background: linear-gradient(
-      to right bottom,
-       rgba(255, 255, 255, 0.05), 
-       rgba(255, 255, 255, .1)
-       );
+    to right bottom,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.1)
+  );
   border-radius: 2rem;
   z-index: 3;
   backdrop-filter: blur(1.1rem);
 }
 
-.chevron{
+.chevron {
   height: 6rem;
   width: 80%;
   position: absolute;
@@ -39,10 +39,10 @@ main {
   height: 85%;
   width: 49vw;
   background: linear-gradient(
-      to right bottom,
-       rgba(255, 255, 255, 0.05), 
-       rgba(255, 255, 255, .1)
-       );
+    to right bottom,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.1)
+  );
   transform: skew(0deg, 15deg);
   z-index: 2;
   border-radius: 1.5rem;
@@ -55,16 +55,14 @@ main {
   height: 85%;
   width: 49vw;
   background: linear-gradient(
-      to right bottom,
-       rgba(255, 255, 255, 0.05), 
-       rgba(255, 255, 255, .1)
-       );
+    to right bottom,
+    rgba(255, 255, 255, 0.05),
+    rgba(255, 255, 255, 0.1)
+  );
   transform: skew(0deg, -15deg);
   z-index: 2;
   border-radius: 1.5rem;
-} 
-
-
+}
 
 .main-container {
   margin-top: 5%;
@@ -73,48 +71,51 @@ main {
   margin: 25px 25px 25px 25px;
 }
 
-.usage-container{
+.usage-container {
   /* border: 1px solid rgb(255, 255, 255); */
-  display:flex;
+  display: flex;
   justify-content: center;
   height: 600px;
   margin: 25px 10px 10px 10px;
 }
 
-.label{
+.label {
   vertical-align: middle;
   text-align: center;
 }
 
-.chart{
+.chart {
   /* border: 1px solid rgb(185, 206, 26); */
   background-color: rgba(36, 38, 26, 0.082);
   height: 360px;
   width: 500px;
-
 }
 
-.disk-chart{
+.disk-chart {
   /* border: 1px solid rgb(185, 206, 26); */
-  flex:2;
+  flex: 2;
   margin: 10px;
   margin-bottom: 68px;
   margin-top: 10px;
-  }
+}
 
-.use-container{
+.use-container {
   /* border: 1px solid rgb(162, 34, 162); */
   text-align: center;
-  padding: 20px;   
+  padding: 20px;
   margin: 10px;
   height: 600px;
-  background: linear-gradient(to right bottom, rgba(145, 92, 8, 0.7), rgba(138, 105, 9, .9));
+  background: linear-gradient(
+    to right bottom,
+    rgba(145, 92, 8, 0.7),
+    rgba(138, 105, 9, 0.9)
+  );
 
   border-radius: 10px;
   box-shadow: 3px 3px rgba(86, 77, 6, 0.9);
 }
 
-h1{
+h1 {
   text-align: center;
 }
 
@@ -128,55 +129,72 @@ h1{
   font-weight: bold;
   margin-top: 8px;
   text-align: center;
-  color: #211F33;
+  color: #211f33;
 }
 
-.services{
-  position: relative;
-  display: flex;
-  color: aliceblue;
-  margin-top: 6rem;
-  margin-left: 40px;
-  margin-right: 40px;
-  margin-bottom: 1rem;
-  height: 5rem;
-  border-radius: 1.5rem;
-
+.hidden {
+  display: none;
 }
 
-.service {
-  border-radius: 1.5rem;
+.data-card {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
   width: 90%;
-  position: relative;
-  text-align: center;
-  align-items: center;
-  padding-top: .8rem;
-  margin-left: 5rem;
-  margin-right: 5rem;
-
+  max-width: 800px;
+  background: linear-gradient(
+    to right bottom,
+    rgba(255, 255, 255, 0.95),
+    rgba(248, 248, 248, 0.95)
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(145, 92, 8, 0.2);
+  box-shadow: 0 8px 16px rgba(138, 105, 9, 0.2);
+  padding: 30px;
+  z-index: 1000;
+  overflow: auto;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
 }
 
-.service-twitch{
-  width: 10%;
-  flex: 1;
-
-}
-.service-two{
-  width: 10%;
-  flex: 1;
-
-}
-.service-three{
-  width: 10%;
-  flex: 1;
+.data-card:hover {
+  box-shadow: 0 12px 24px rgba(138, 105, 9, 0.3);
 }
 
-.service-on {
-  background: linear-gradient(to right top, rgba(58, 54, 97, .5), rgba(35, 30, 77, .9));
-  color: rgba(180, 138, 12, 0.9);
+pre {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  background-color: rgba(36, 38, 26, 0.05);
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid rgba(145, 92, 8, 0.15);
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #2a2f4c;
+  max-height: calc(100% - 100px);
+  overflow-y: auto;
 }
 
-.service-off {
-  background: linear-gradient(to right top, rgba(51, 54, 97, .2), rgba(35, 30, 77, .3));
-  color: #2f2a5f;
+pre .json-key {
+  color: #8b4513;
+  font-weight: 600;
+}
+
+pre .json-string {
+  color: #1a5f7a;
+}
+
+pre .json-number {
+  color: #0b6e4f;
+}
+
+pre .json-boolean {
+  color: #7b2cbf;
+}
+
+pre .json-null {
+  color: #c41e3a;
 }

@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     fetch('/api/1.0.0/data-schema'),
   ]);
   const statsSchema = await statsSchemaResponse.json();
+  console.log(statsSchema);
 
   // Function to validate event against schema
   function validateAgainstSchema(event, schema) {
@@ -61,18 +62,49 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Main Websocket Communication
   socket.onmessage = function (event) {
     let data = JSON.parse(event.data);
-    console.log(data);
-    if (data.data) {
-      if (data.event === 'data-request') {
+    // displayData(data);
+    if (data) {
+      if (JSON.parse(data).event === 'DATA-REQUEST') {
         try {
-          validateAgainstSchema(data.data, statsSchema);
-          updateData(data.data);
+          validateAgainstSchema(JSON.parse(data), statsSchema);
+          updateData(JSON.parse(data).data);
         } catch (err) {
           console.error('Schema validation failed:', err);
         }
       }
     }
   };
+
+  function displayData(data) {
+    const card = document.getElementById('dataCard');
+    const jsonData = document.getElementById('jsonData');
+
+    // Parse the JSON string if it's a string
+    const jsonObj =
+      typeof data === 'string' ? JSON.parse(data) : data;
+
+    // Format the JSON data with proper indentation
+    const formattedJson = JSON.stringify(jsonObj, null, 2)
+      .replace(/\\"/g, '"') // Remove escaped quotes
+      .replace(/,(?=\s*[}\]])/g, ''); // Remove trailing commas
+
+    // Add syntax highlighting by wrapping keys and values
+    const highlightedJson = formattedJson
+      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+      .replace(
+        /: "([^"]+)"/g,
+        ': <span class="json-string">"$1"</span>'
+      )
+      .replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+
+    jsonData.innerHTML = highlightedJson;
+    card.classList.remove('hidden');
+  }
+
+  function closeCard() {
+    const card = document.getElementById('dataCard');
+    card.classList.add('hidden');
+  }
 
   // Chart configs
   let numberElements = 120;
