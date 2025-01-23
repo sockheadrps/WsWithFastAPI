@@ -1,45 +1,48 @@
-import json
-from pydantic import BaseModel, Field, ConfigDict
-from typing import Dict, Any
+from pydantic import (
+    BaseModel,
+    Field,
+    ConfigDict,
+    UUID4,
+    InstanceOf,
+    AliasGenerator,
+)
+from pydantic.alias_generators import to_camel
+from typing import Dict
 from fastapi import WebSocket
 from enum import Enum
 import uuid
-from uuid import UUID
 from datetime import datetime
 from server.utilities.stats import Computer
 
 
 class Connection(BaseModel):
-    client_id: UUID = Field(default_factory=uuid.uuid4)
-    websocket: WebSocket
+    client_id: UUID4 = Field(default_factory=uuid.uuid4)
+    websocket: InstanceOf[WebSocket]
 
-    model_config = ConfigDict(
-        arbitrary_types_allowed=True,
-        json_encoders={
-            WebSocket: lambda ws: repr(ws),
-            UUID: lambda x: str(x),
-            datetime: lambda dt: dt.isoformat(),
-        },
-    )
+    model_config = ConfigDict(arbitrary_types_allowed=True, frozen=True)
 
 
 class EventType(str, Enum):
-    DATA_REQUEST = "data-request"
+    CONNECT = "CONNECT"
+    CONNECTION_RESPONSE = "CONNECTION_RESPONSE"
+    DATA_REQUEST = "DATA-REQUEST"
 
 
 class ConnectionResponsePayload(BaseModel):
-    client_id: UUID
-    server_time: datetime
+    client_id: InstanceOf[UUID4]
+
+    model_config = ConfigDict(alias_generator=AliasGenerator(serialization_alias=to_camel), frozen=True)
 
 
 class BaseWebsocketEvent(BaseModel):
-    client_id: UUID = Field(default_factory=uuid.uuid4)
-    event: str
-    payload: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=datetime.now)
+    event: InstanceOf[EventType]
+    data: InstanceOf[ConnectionResponsePayload]
+    time: InstanceOf[datetime] = Field(default_factory=datetime.now)
+
+    model_config = ConfigDict(use_enum_values=True, frozen=True)
 
 
-class StatsPayload(BaseModel):
+class StatsData(BaseModel):
     cpu_count: int
     cpu_usage: float
     cpu_frequency: Dict[str, float]
@@ -53,14 +56,6 @@ class StatsPayload(BaseModel):
     disk_percentage: float
 
 
-class StatsEvent(BaseModel):
-    client_id: UUID | str
-    event: str
-    data: StatsPayload = Field(default_factory=lambda: StatsPayload(**Computer.get_stats_dict()))
-    timestamp: datetime = Field(default_factory=datetime.now)
-
-    def model_dump(self, **kwargs):
-        data = super().model_dump(**kwargs)
-        data["client_id"] = str(data["client_id"])
-        data["timestamp"] = data["timestamp"].isoformat()
-        return data
+class StatsEventPayload(BaseModel):
+    event: InstanceOf[EventType]
+    data: StatsData = Field(default_factory=lambda: StatsData(**Computer.get_stats_dict()))

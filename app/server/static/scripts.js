@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     fetch('/api/1.0.0/data-schema'),
   ]);
   const statsSchema = await statsSchemaResponse.json();
+  console.log(statsSchema);
 
   // Function to validate event against schema
   function validateAgainstSchema(event, schema) {
@@ -34,7 +35,9 @@ document.addEventListener('DOMContentLoaded', async function () {
   }
 
   // Open Websocket connection
-  var socket = new WebSocket('ws://localhost:8000/api/1.0.0/ws/stats');
+  var socket = new WebSocket(
+    'ws://localhost:8000/api/1.0.0/ws/stats'
+  );
 
   // On open function
   socket.onopen = function (event) {
@@ -59,18 +62,49 @@ document.addEventListener('DOMContentLoaded', async function () {
   // Main Websocket Communication
   socket.onmessage = function (event) {
     let data = JSON.parse(event.data);
-    console.log(data);
-    if (data.data) {
-      if (data.event === 'data-request') {
+    // displayData(data);
+    if (data) {
+      if (JSON.parse(data).event === 'DATA-REQUEST') {
         try {
-          validateAgainstSchema(data.data, statsSchema);
-          updateData(data.data);
+          validateAgainstSchema(JSON.parse(data), statsSchema);
+          updateData(JSON.parse(data).data);
         } catch (err) {
           console.error('Schema validation failed:', err);
         }
       }
     }
   };
+
+  function displayData(data) {
+    const card = document.getElementById('dataCard');
+    const jsonData = document.getElementById('jsonData');
+
+    // Parse the JSON string if it's a string
+    const jsonObj =
+      typeof data === 'string' ? JSON.parse(data) : data;
+
+    // Format the JSON data with proper indentation
+    const formattedJson = JSON.stringify(jsonObj, null, 2)
+      .replace(/\\"/g, '"') // Remove escaped quotes
+      .replace(/,(?=\s*[}\]])/g, ''); // Remove trailing commas
+
+    // Add syntax highlighting by wrapping keys and values
+    const highlightedJson = formattedJson
+      .replace(/"([^"]+)":/g, '<span class="json-key">"$1"</span>:')
+      .replace(
+        /: "([^"]+)"/g,
+        ': <span class="json-string">"$1"</span>'
+      )
+      .replace(/: (\d+)/g, ': <span class="json-number">$1</span>');
+
+    jsonData.innerHTML = highlightedJson;
+    card.classList.remove('hidden');
+  }
+
+  function closeCard() {
+    const card = document.getElementById('dataCard');
+    card.classList.add('hidden');
+  }
 
   // Chart configs
   let numberElements = 120;
@@ -163,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async function () {
   // diskUsageChart Instance
   var diskUsageChartInstance = new Chart(diskUsageChart, {
     type: 'doughnut',
-    responsive: true,
+    responsive: false,
     maintainAspectRatio: false,
     labels: ['free', 'Used'],
     data: {
@@ -187,15 +221,6 @@ document.addEventListener('DOMContentLoaded', async function () {
           text: 'Disk Usage',
           fontSize: 18,
         },
-        aspectRatio: 1,
-        layout: {
-          padding: {
-            left: 0,
-            right: 0,
-            top: 20,
-            bottom: 20
-          }
-        }
       }
     ),
   });

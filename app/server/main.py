@@ -1,17 +1,18 @@
 import signal
 import sys
-from fastapi import FastAPI, HTTPException, Request, WebSocket
+from fastapi import FastAPI, HTTPException, Request, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
-from server.utilities.models.models import StatsPayload
+from server.utilities.models.models import StatsEventPayload
 from .utilities.manager import Manager
+from rich.pretty import pprint
 
 app = FastAPI(
-    title="Server Statistics Dashboard", 
-    description="Real-time server metrics visualization", 
-    version="1.0.0"
+    title="Server Statistics Dashboard",
+    description="Real-time server metrics visualization",
+    version="1.0.0",
 )
 
 API_VERSION = app.version  # Extract the version for reuse
@@ -42,19 +43,15 @@ async def stats_endpoint(request: Request) -> HTMLResponse:
 async def stats_websocket(client_websocket: WebSocket):
     try:
         connection = await connection_manager.connect(client_websocket)
+        pprint(connection)
         await connection_manager.handle_message(connection)
-
-    except Exception as e:
-        print(f"[red]WebSocket connection error: {str(e)}[/red]")
-
-    finally:
-        await connection_manager.disconnect(str(connection.client_id))
+    except WebSocketDisconnect:
+        await connection_manager.disconnect(str(connection.model_dump()["clien_id"]))
 
 
 @app.get(f"/api/{API_VERSION}/data-schema")
 def data_schema():
-    """Return the JSON schema for stats payload validation"""
-    return {"data_schema": StatsPayload.model_json_schema()}
+    return {"data_schema": StatsEventPayload.model_json_schema()}
 
 
 if __name__ == "__main__":
